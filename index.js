@@ -1,47 +1,40 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const cors = require('cors');
-const { sequelize } = require('./src/config/configDB');
+const express = require("express")
+const dotenv = require("dotenv")
+const cors = require("cors")
+const { sequelize } = require("./src/config/configDB")
+const authRoute = require("./src/module/autenticacao/routes/autenticacao.route")
+const usuarioRoute = require("./src/module/usuario/routes/usuario.route")
+const estoqueRoute = require("./src/module/estoqueBicicleta/routes/estoque.route")
 
-// Importações dos módulos
-const UsuarioMiddleware = require('./src/module/usuario/middleware/usuario.middleware');
-const usuarioRoutes = require('./src/module/usuario/routes/usuario.route'); 
-const estoqueRoutes = require('./src/module/estoqueBicicleta/routes/estoque.route');
+dotenv.config();
 
-dotenv.config(); // Carrega variáveis de ambiente do .env
-
-const app = express();
-
-// Configuração do CORS para permitir requisições do front-end
+const app = express()
 app.use(cors({
     origin: 'http://localhost:5173',
     credentials: true
-}));
+}))
 
-app.use(express.json()); // Para tratar JSON nas requisições
+app.use(express.json());
 
-// ROTAS PÚBLICAS
-app.use('/api', usuarioRoutes); // Login, cadastro, etc
+app.use('/api/', estoqueRoute)
 
-//  MIDDLEWARE DE AUTENTICAÇÃO
-// Tudo abaixo disso exige token JWT válido
-app.use(UsuarioMiddleware.autenticarToken);
+app.use('/api/', usuarioRoute)
 
-//  ROTAS PROTEGIDAS
-app.use('/api/estoque', estoqueRoutes);
+app.use('/api/',authRoute)
 
-//  SUBIDA DO SERVIDOR
-const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, async () => {
+const PORTA = process.env.PORTA
+
+
+app.listen(PORTA, async () =>{
     try {
         await sequelize.authenticate();
-        console.log('Conexão com o banco de dados estabelecida com sucesso.');
+        console.log('conexão com o banco de dados foi estabecida com sucesso')
 
-        await sequelize.sync({ alter: true });
-        console.log('Banco de dados sincronizado com sucesso.');
+        await sequelize.sync({ force: true, alter: true});
+        console.log("Banco de dados dincronizado com sucesso")
     } catch (error) {
-        console.error('Não foi possível conectar ao banco de dados:', error);
+        console.log('erro ao conectar ou sicronizar com o banco de dados', error.message)
     }
-    console.log(`Servidor rodando na porta ${PORT}`);
-});
+    console.log(`Servidor rodando na porta ${PORTA}`)
+})

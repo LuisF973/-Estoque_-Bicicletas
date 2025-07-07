@@ -9,3 +9,5 @@ const UsuarioMiddleware = require('../middleware/usuario.middleware');
 router.post('/usuario', UsuarioController.criarUsuario);
 // Rota para listar todos os usuários
 router.get('/usuario', UsuarioMiddleware.autenticarToken, UsuarioController.listarUsuarios);
+
+module.exports = router;
